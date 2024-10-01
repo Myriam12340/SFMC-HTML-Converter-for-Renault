@@ -148,18 +148,21 @@ def process_file():
     # Insert image tag in the body
     body_tag_pos = content.find("<body")
     if body_tag_pos != -1:
+        # Localise la fin de la balise <body>
         body_tag_end = content.find(">", body_tag_pos) + 1
+        # Récupérer le contenu après la balise <body>
         before_body_content = content[body_tag_end:]
 
-        if any(variant in before_body_content for variant in ["<div id='_two50'></div>", '<div id="_two50"></div>']):
+        # Expression régulière pour capturer <div id='_two50'></div> suivi d'une balise <img /> entièrement
+        pattern = r"""<div id=['"]_two50['"]></div>\s*<img[^>]*>\s*&c=%%jobid%%[^>]*>"""
 
-            before_body_content = before_body_content.replace("<div id='_two50'></div>", img_tag)
-            before_body_content = before_body_content.replace('<div id="_two50"></div>', img_tag)
-        else:
-            before_body_content = img_tag + before_body_content
+        # Remplacement dans le contenu après <body>
+        before_body_content = re.sub(pattern, img_tag, before_body_content)
 
+        # Mise à jour du contenu avec la nouvelle partie après <body>
         content = content[:body_tag_end] + before_body_content
     else:
+        # Si pas de balise <body>, ajoute img_tag à la fin du contenu
         content += img_tag
 
     if prefrencecenter:
